@@ -3,7 +3,8 @@
 #include "Public/ChooseNextWaypoint.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
-#include "Public/PatrollingGuard.h"
+//#include "Public/PatrollingGuard.h"
+#include "Public/CharacterPatrol.h"
 
 EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent & OwnerComp, uint8 * NodeMemory)
 {
@@ -16,11 +17,15 @@ EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent & Ow
 	
 	auto Pawn = AIOwner->GetPawn();
 	if (!Pawn) return EBTNodeResult::Failed;
+
+	auto PatrolComp = Pawn->FindComponentByClass<UCharacterPatrol>();
+	if (!PatrolComp) return EBTNodeResult::Failed;
 	
-	auto PatrolGuard = Cast<APatrollingGuard>(Pawn);
-	if (!PatrolGuard) return EBTNodeResult::Failed;
+	//auto PatrolGuard = Cast<APatrollingGuard>(Pawn);
+	//if (!PatrolGuard) return EBTNodeResult::Failed;
 	
-	auto PatrolPoints = PatrolGuard->GetPatrolPoints();
+	//auto PatrolPoints = PatrolGuard->GetPatrolPoints();
+	auto PatrolPoints = PatrolComp->GetPatrolPoints();
 	if (PatrolPoints.Num() <= Index) return EBTNodeResult::Failed;
 	
 	auto NextWaypoint = PatrolPoints[Index];
