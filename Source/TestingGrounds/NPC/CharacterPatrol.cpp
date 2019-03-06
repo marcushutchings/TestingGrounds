@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Public/CharacterPatrol.h"
+#include "CharacterPatrol.h"
 
 // Sets default values for this component's properties
 UCharacterPatrol::UCharacterPatrol()
