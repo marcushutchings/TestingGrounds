@@ -15,10 +15,6 @@ AGun::AGun()
 
 	// Create a gun mesh component
 	FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
-	FP_Gun->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
-	FP_Gun->bCastDynamicShadow = false;
-	FP_Gun->CastShadow = false;
-	// FP_Gun->SetupAttachment(Mesh1P, TEXT("GripPoint"));
 	FP_Gun->SetupAttachment(RootComponent);
 
 	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
@@ -43,7 +39,7 @@ void AGun::Tick(float DeltaTime)
 void AGun::Fire()
 {
 	// try and fire a projectile
-	if (ProjectileClass != NULL && FP_MuzzleLocation != nullptr)
+	if (ensure(ProjectileClass) && ensure(FP_MuzzleLocation))
 	{
 		UWorld* const World = GetWorld();
 		if (World != NULL)
