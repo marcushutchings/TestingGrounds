@@ -3,6 +3,7 @@
 #include "Mannequin.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Weapons/Gun.h"
 
@@ -43,9 +44,14 @@ void AMannequin::BeginPlay()
 			FP_Gun->AnimInstance = Mesh1P->GetAnimInstance();
 		}
 	}
+
+	if (InputComponent)
+	{
+		InputComponent->BindAction("Fire", IE_Pressed, this, &AMannequin::PullTrigger);
+	}
 }
 
-void AMannequin::Fire()
+void AMannequin::PullTrigger()
 {
 	if (FP_Gun) FP_Gun->Fire();
 }

@@ -41,5 +41,5 @@ public:
 
 	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		void Fire();
+		void PullTrigger();
 };
