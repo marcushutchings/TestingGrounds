@@ -44,10 +44,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 		class UAnimMontage* TPFireAnimation;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
-	UAnimInstance* FPAnimInstance;
+	UPROPERTY()
+		UAnimInstance* FPAnimInstance;
 
-	UAnimInstance* TPAnimInstance;
+	UPROPERTY()
+		UAnimInstance* TPAnimInstance;
 
 	// Sets default values for this actor's properties
 	AGun();

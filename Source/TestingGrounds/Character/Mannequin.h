@@ -22,9 +22,15 @@ class TESTINGGROUNDS_API AMannequin : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class AGun* FP_Gun;
 
+	USkeletalMeshComponent* GetMeshToAttachGunTo();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void SpawnGun();
+
+	void BindInputs();
 
 public:
 	// Sets default values for this character's properties
@@ -42,4 +48,6 @@ public:
 	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 		void PullTrigger();
+
+	virtual void UnPossessed() override;
 };

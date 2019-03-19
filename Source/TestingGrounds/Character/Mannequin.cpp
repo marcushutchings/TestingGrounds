@@ -29,23 +29,43 @@ AMannequin::AMannequin()
 	Mesh1P->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 }
 
+USkeletalMeshComponent * AMannequin::GetMeshToAttachGunTo()
+{
+	USkeletalMeshComponent* SelectedMesh = GetMesh();
+
+	if (IsPlayerControlled())
+	{
+		SelectedMesh = Mesh1P;
+	}
+
+	return SelectedMesh;
+}
+
 // Called when the game starts or when spawned
 void AMannequin::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	if (ensure(FP_GunBlueprint))
-	{
-		FP_Gun = GetWorld()->SpawnActor<AGun>(FP_GunBlueprint);
-		if (FP_Gun)
-		{
-			FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
-			FP_Gun->FPAnimInstance = Mesh1P->GetAnimInstance();
-			FP_Gun->TPAnimInstance = GetMesh()->GetAnimInstance();
-		}
-	}
+	SpawnGun();
+	BindInputs();
+}
 
+void AMannequin::SpawnGun()
+{
+	if (!ensure(FP_GunBlueprint)) return;
+
+	FP_Gun = GetWorld()->SpawnActor<AGun>(FP_GunBlueprint);
+	if (FP_Gun)
+	{
+		FP_Gun->AttachToComponent(GetMeshToAttachGunTo(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+		FP_Gun->FPAnimInstance = Mesh1P->GetAnimInstance();
+		FP_Gun->TPAnimInstance = GetMesh()->GetAnimInstance();
+	}
+}
+
+void AMannequin::BindInputs()
+{
 	if (InputComponent)
 	{
 		InputComponent->BindAction("Fire", IE_Pressed, this, &AMannequin::PullTrigger);
@@ -55,6 +75,17 @@ void AMannequin::BeginPlay()
 void AMannequin::PullTrigger()
 {
 	if (FP_Gun) FP_Gun->Fire();
+}
+
+
+void AMannequin::UnPossessed()
+{
+	Super::UnPossessed();
+
+	if (FP_Gun)
+	{
+		FP_Gun->AttachToComponent(GetMeshToAttachGunTo(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	}
 }
 
 // Called every frame
