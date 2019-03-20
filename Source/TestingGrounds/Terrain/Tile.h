@@ -19,7 +19,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Setup")
-		void PlaceTerrain();
+		void PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn);
 
 protected:
 	// Called when the game starts or when spawned

@@ -2,6 +2,7 @@
 
 #include "Tile.h"
 #include "Math/UnrealMathUtility.h"
+#include "Engine/World.h"
 
 // Sets default values
 ATile::ATile()
@@ -15,27 +16,31 @@ ATile::ATile()
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	PlaceTerrain();
 }
 
 // Called every frame
 void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-void ATile::PlaceTerrain()
+void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn)
 {
 	FVector PlacementMinBoundary(0.f, -1950.f, 0.f);
 	FVector PlacementMaxBoundary(4000.f, 1950.f, 0.f);
-	FBox PlacementZone(PlacementMinBoundary, PlacementMaxBoundary);
 
-	for (size_t i = 0; i < 20; i++)
+	//PlacementMinBoundary += GetActorLocation();
+	//PlacementMaxBoundary += GetActorLocation();
+
+	FBox PlacementZone(PlacementMinBoundary, PlacementMaxBoundary);
+	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
+
+	for (size_t i = 0; i < NumberToSpawn; i++)
 	{
 		FVector SpawnPoint = FMath::RandPointInBox(PlacementZone);
-		UE_LOG(LogTemp, Warning, TEXT("Spawn Point %s chosen"), *SpawnPoint.ToString())
+		AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
+		Spawned->SetActorRelativeLocation(SpawnPoint);
+		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 	}
 }
 
