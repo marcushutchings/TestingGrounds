@@ -6,22 +6,56 @@
 
 #include "DrawDebugHelpers.h"
 
-bool ATile::CastSphereCollides(FVector Location, float Radius)
+#define MAX_ATTEMPTS 50
+
+bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 {
 	FHitResult HitResult;
+	FVector GlobalLocation = ActorToWorld().TransformPosition(Location);
+
 	bool HitFound = GetWorld()->SweepSingleByChannel
 		( HitResult
-		, Location
-		, Location
+		, GlobalLocation
+		, GlobalLocation
 		, FQuat::Identity
 		, ECollisionChannel::ECC_GameTraceChannel2
 		, FCollisionShape::MakeSphere(Radius)
 		);
 	
 	FColor DebugColour = HitFound ? FColor::Red : FColor::Green;
-	DrawDebugCapsule(GetWorld(), Location, 0, Radius, FQuat::Identity, DebugColour, true, 100.f);
+	DrawDebugCapsule(GetWorld(), GlobalLocation, 0, Radius, FQuat::Identity, DebugColour, true, 100.f);
 	
-	return HitFound;
+	return !HitFound;
+}
+
+FVector ATile::ChooseSpawnLocation()
+{
+	FVector PlacementMinBoundary(0.f, -1950.f, 0.f);
+	FVector PlacementMaxBoundary(4000.f, 1950.f, 0.f);
+	FBox PlacementZone(PlacementMinBoundary, PlacementMaxBoundary);
+
+	return FMath::RandPointInBox(PlacementZone);
+}
+
+bool ATile::TryFindSafeSpawnLocation(FVector& OutLocation, float SafeRadius)
+{
+	for (size_t i = 0; i < MAX_ATTEMPTS; i++)
+	{
+		FVector SpawnPoint = ChooseSpawnLocation();
+		if (CanSpawnAtLocation(SpawnPoint, SafeRadius))
+		{
+			OutLocation = SpawnPoint;
+			return true;
+		}
+	}
+	return false;
+}
+
+void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location)
+{
+	AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
+	Spawned->SetActorRelativeLocation(Location);
+	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
 }
 
 // Sets default values
@@ -35,9 +69,6 @@ ATile::ATile()
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CastSphereCollides(GetActorLocation(), 300.f);
-	CastSphereCollides(GetActorLocation() + FVector(0.f, 0.f, 1000.f), 300.f);
 }
 
 // Called every frame
@@ -46,19 +77,16 @@ void ATile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn)
+void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float SafeRadius)
 {
-	FVector PlacementMinBoundary(0.f, -1950.f, 0.f);
-	FVector PlacementMaxBoundary(4000.f, 1950.f, 0.f);
-
-	FBox PlacementZone(PlacementMinBoundary, PlacementMaxBoundary);
 	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
 
 	for (size_t i = 0; i < NumberToSpawn; i++)
 	{
-		FVector SpawnPoint = FMath::RandPointInBox(PlacementZone);
-		AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
-		Spawned->SetActorRelativeLocation(SpawnPoint);
-		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		FVector SpawnPoint;
+		if (TryFindSafeSpawnLocation(SpawnPoint, SafeRadius))
+			SpawnActor(ToSpawn, SpawnPoint);
+		else
+			UE_LOG(LogTemp, Error, TEXT("Failed to fail safe spawn for %s, number %d"), *ToSpawn->GetName(), i+1);
 	}
 }
