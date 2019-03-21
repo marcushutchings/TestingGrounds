@@ -10,6 +10,8 @@ UCLASS()
 class TESTINGGROUNDS_API ATile : public AActor
 {
 	GENERATED_BODY()
+
+	bool CastSphereCollides(FVector Location, float Radius);
 	
 public:	
 	// Sets default values for this actor's properties
