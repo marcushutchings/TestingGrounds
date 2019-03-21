@@ -17,7 +17,7 @@ class TESTINGGROUNDS_API ATile : public AActor
 
 	bool TryFindSafeSpawnLocation(FVector& OutLocation, float SafeRadius);
 
-	void SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location);
+	void SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location, float YawRotation, float Scale);
 
 public:	
 	// Sets default values for this actor's properties
@@ -27,7 +27,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Setup")
-		void PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float SafeRadius = 300.f);
+		void PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale = 1.f, float MaxScale = 1.f, float SafeRadius = 300.f);
 
 protected:
 	// Called when the game starts or when spawned

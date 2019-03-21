@@ -22,8 +22,8 @@ bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 		, FCollisionShape::MakeSphere(Radius)
 		);
 	
-	FColor DebugColour = HitFound ? FColor::Red : FColor::Green;
-	DrawDebugCapsule(GetWorld(), GlobalLocation, 0, Radius, FQuat::Identity, DebugColour, true, 100.f);
+	//FColor DebugColour = HitFound ? FColor::Red : FColor::Green;
+	//DrawDebugCapsule(GetWorld(), GlobalLocation, 0, Radius, FQuat::Identity, DebugColour, true, 100.f);
 	
 	return !HitFound;
 }
@@ -51,11 +51,13 @@ bool ATile::TryFindSafeSpawnLocation(FVector& OutLocation, float SafeRadius)
 	return false;
 }
 
-void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location)
+void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location, float YawRotation, float Scale)
 {
 	AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
 	Spawned->SetActorRelativeLocation(Location);
 	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+	Spawned->SetActorRotation(FRotator(0.f, YawRotation, 0.f));
+	Spawned->SetActorScale3D(FVector(Scale));
 }
 
 // Sets default values
@@ -77,15 +79,20 @@ void ATile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float SafeRadius)
+void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
 {
 	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
 
 	for (size_t i = 0; i < NumberToSpawn; i++)
 	{
 		FVector SpawnPoint;
-		if (TryFindSafeSpawnLocation(SpawnPoint, SafeRadius))
-			SpawnActor(ToSpawn, SpawnPoint);
+		float Scale = FMath::RandRange(MinScale, MaxScale);
+
+		if (TryFindSafeSpawnLocation(SpawnPoint, SafeRadius*Scale))
+		{
+			float Rotation = FMath::RandRange(-180.f, 180.f);
+			SpawnActor(ToSpawn, SpawnPoint, Rotation, Scale);
+		}
 		else
 			UE_LOG(LogTemp, Error, TEXT("Failed to fail safe spawn for %s, number %d"), *ToSpawn->GetName(), i+1);
 	}
