@@ -3,7 +3,6 @@
 #include "Tile.h"
 #include "Math/UnrealMathUtility.h"
 #include "Engine/World.h"
-#include "EngineUtils.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -72,14 +71,6 @@ ATile::ATile()
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-
-	auto ActorIterator = TActorIterator<AActor>(GetWorld());
-	while (ActorIterator)
-	{
-		AActor* FoundActor = *ActorIterator;
-		UE_LOG(LogTemp, Warning, TEXT("Found Actor %s"), *FoundActor->GetName());
-		++ActorIterator;
-	}
 }
 
 // Called every frame
