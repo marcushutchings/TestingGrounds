@@ -3,10 +3,11 @@
 #include "Tile.h"
 #include "Math/UnrealMathUtility.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 
 #include "DrawDebugHelpers.h"
 
-#define MAX_ATTEMPTS 50
+#define MAX_ATTEMPTS 20
 
 bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 {
@@ -71,6 +72,14 @@ ATile::ATile()
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	auto ActorIterator = TActorIterator<AActor>(GetWorld());
+	while (ActorIterator)
+	{
+		AActor* FoundActor = *ActorIterator;
+		UE_LOG(LogTemp, Warning, TEXT("Found Actor %s"), *FoundActor->GetName());
+		++ActorIterator;
+	}
 }
 
 // Called every frame
