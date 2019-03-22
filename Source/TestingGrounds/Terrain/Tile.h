@@ -29,7 +29,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 		void PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale = 1.f, float MaxScale = 1.f, float SafeRadius = 300.f);
 
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+		void SetNavMeshVolumePool(class UActorPool* PoolToSet);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+
+	class UActorPool* NavMeshVolumePool;
 };

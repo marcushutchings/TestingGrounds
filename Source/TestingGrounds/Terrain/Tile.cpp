@@ -1,8 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Tile.h"
+#include "ActorPool.h"
 #include "Math/UnrealMathUtility.h"
 #include "Engine/World.h"
+#include "InfiniteTerrainGameMode.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -96,4 +98,9 @@ void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 Ma
 		else
 			UE_LOG(LogTemp, Error, TEXT("Failed to fail safe spawn for %s, number %d"), *ToSpawn->GetName(), i+1);
 	}
+}
+
+void ATile::SetNavMeshVolumePool(UActorPool * PoolToSet)
+{
+	NavMeshVolumePool = PoolToSet;
 }
