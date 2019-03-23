@@ -52,13 +52,13 @@ bool ATile::TryFindSafeSpawnLocation(FVector& OutLocation, float SafeRadius)
 	return false;
 }
 
-void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location, float YawRotation, float Scale)
+void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, const FSpawnPosition& SpawnPosition)
 {
 	AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
-	Spawned->SetActorRelativeLocation(Location);
+	Spawned->SetActorRelativeLocation(SpawnPosition.Location);
 	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-	Spawned->SetActorRotation(FRotator(0.f, YawRotation, 0.f));
-	Spawned->SetActorScale3D(FVector(Scale));
+	Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
+	Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
 }
 
 // Sets default values
@@ -94,21 +94,32 @@ void ATile::Tick(float DeltaTime)
 
 void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
 {
-	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
+	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(MinToSpawn, MaxToSpawn, MinScale, MaxScale, SafeRadius, ToSpawn);
 
+	for (auto SpawnPosition : SpawnPositions)
+	{
+		SpawnActor(ToSpawn, SpawnPosition);
+	}
+}
+
+TArray<FSpawnPosition> ATile::GenerateSpawnPositions(int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius, TSubclassOf<AActor> &ToSpawn)
+{
+	TArray<FSpawnPosition> SpawnPositions;
+	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
 	for (size_t i = 0; i < NumberToSpawn; i++)
 	{
-		FVector SpawnPoint;
-		float Scale = FMath::RandRange(MinScale, MaxScale);
+		FSpawnPosition SpawnPosition;
+		SpawnPosition.Scale = FMath::RandRange(MinScale, MaxScale);
 
-		if (TryFindSafeSpawnLocation(SpawnPoint, SafeRadius*Scale))
+		if (TryFindSafeSpawnLocation(SpawnPosition.Location, SafeRadius*SpawnPosition.Scale))
 		{
-			float Rotation = FMath::RandRange(-180.f, 180.f);
-			SpawnActor(ToSpawn, SpawnPoint, Rotation, Scale);
+			SpawnPosition.YawRotation = FMath::RandRange(-180.f, 180.f);
+			SpawnPositions.Add(SpawnPosition);
 		}
 		else
-			UE_LOG(LogTemp, Error, TEXT("Failed to safe spawn for %s, number %d"), *ToSpawn->GetName(), i+1);
+			UE_LOG(LogTemp, Error, TEXT("Failed to safe spawn for %s, number %d"), *ToSpawn->GetName(), i + 1);
 	}
+	return SpawnPositions;
 }
 
 void ATile::SetNavMeshVolumePool(UActorPool * PoolToSet)
