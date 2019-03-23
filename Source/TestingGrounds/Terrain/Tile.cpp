@@ -61,6 +61,16 @@ void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, const FSpawnPosition& SpawnP
 	Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
 }
 
+void ATile::SpawnAIPawn(TSubclassOf<APawn> ToSpawn, const FSpawnPosition & SpawnPosition)
+{
+	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn);
+	Spawned->SetActorRelativeLocation(SpawnPosition.Location);
+	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+	Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
+	Spawned->SpawnDefaultController();
+	Spawned->Tags.Add(FName("GuardBots"));
+}
+
 // Sets default values
 ATile::ATile()
 {
@@ -94,7 +104,7 @@ void ATile::Tick(float DeltaTime)
 
 void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
 {
-	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(MinToSpawn, MaxToSpawn, MinScale, MaxScale, SafeRadius, ToSpawn);
+	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(MinToSpawn, MaxToSpawn, MinScale, MaxScale, SafeRadius);
 
 	for (auto SpawnPosition : SpawnPositions)
 	{
@@ -102,7 +112,17 @@ void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 Ma
 	}
 }
 
-TArray<FSpawnPosition> ATile::GenerateSpawnPositions(int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius, TSubclassOf<AActor> &ToSpawn)
+void ATile::PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float SafeRadius)
+{
+	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(MinToSpawn, MaxToSpawn, 1.f, 1.f, SafeRadius);
+
+	for (auto SpawnPosition : SpawnPositions)
+	{
+		SpawnAIPawn(ToSpawn, SpawnPosition);
+	}
+}
+
+TArray<FSpawnPosition> ATile::GenerateSpawnPositions(int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
 {
 	TArray<FSpawnPosition> SpawnPositions;
 	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
@@ -116,8 +136,6 @@ TArray<FSpawnPosition> ATile::GenerateSpawnPositions(int32 MinToSpawn, int32 Max
 			SpawnPosition.YawRotation = FMath::RandRange(-180.f, 180.f);
 			SpawnPositions.Add(SpawnPosition);
 		}
-		else
-			UE_LOG(LogTemp, Error, TEXT("Failed to safe spawn for %s, number %d"), *ToSpawn->GetName(), i + 1);
 	}
 	return SpawnPositions;
 }
