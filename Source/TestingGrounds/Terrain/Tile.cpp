@@ -32,10 +32,7 @@ bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 
 FVector ATile::ChooseSpawnLocation()
 {
-	FVector PlacementMinBoundary(0.f, -1950.f, 0.f);
-	FVector PlacementMaxBoundary(4000.f, 1950.f, 0.f);
 	FBox PlacementZone(PlacementMinBoundary, PlacementMaxBoundary);
-
 	return FMath::RandPointInBox(PlacementZone);
 }
 
@@ -67,12 +64,23 @@ ATile::ATile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	PlacementMinBoundary = FVector(0.f, -1950.f, 0.f);
+	PlacementMaxBoundary = FVector(4000.f, 1950.f, 0.f);
 }
 
 // Called when the game starts or when spawned
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if (NavMeshVolumePool)
+		NavMeshVolumePool->Return(NavMeshBoundsVolume);
+	UE_LOG(LogTemp, Error, TEXT("End Play Called on me %s."), *GetName());
 }
 
 // Called every frame
@@ -96,11 +104,26 @@ void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 Ma
 			SpawnActor(ToSpawn, SpawnPoint, Rotation, Scale);
 		}
 		else
-			UE_LOG(LogTemp, Error, TEXT("Failed to fail safe spawn for %s, number %d"), *ToSpawn->GetName(), i+1);
+			UE_LOG(LogTemp, Error, TEXT("Failed to safe spawn for %s, number %d"), *ToSpawn->GetName(), i+1);
 	}
 }
 
 void ATile::SetNavMeshVolumePool(UActorPool * PoolToSet)
 {
 	NavMeshVolumePool = PoolToSet;
+	PositionNavMeshBoundsVolume();
+}
+
+void ATile::PositionNavMeshBoundsVolume()
+{
+	if (NavMeshVolumePool)
+	{
+		NavMeshBoundsVolume = NavMeshVolumePool->Checkout();
+		if (NavMeshBoundsVolume)
+		{
+			NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
+		}
+		else
+			UE_LOG(LogTemp, Error, TEXT("Not enough Nav Mesh Bounds Volumes in the Pool."));
+	}
 }

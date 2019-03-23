@@ -8,8 +8,6 @@ UActorPool::UActorPool()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
-	// ...
 }
 
 
@@ -17,9 +15,6 @@ UActorPool::UActorPool()
 void UActorPool::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
 
@@ -27,17 +22,13 @@ void UActorPool::BeginPlay()
 void UActorPool::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 AActor * UActorPool::Checkout()
 {
 	if (PoolOfActors.Num() == 0) return nullptr;
 
-	AActor* Result = PoolOfActors[0];
-	PoolOfActors.RemoveAt(0, 1, false);
-	return Result;
+	return PoolOfActors.Pop(false);
 }
 
 void UActorPool::Return(AActor * ActorToReturn)

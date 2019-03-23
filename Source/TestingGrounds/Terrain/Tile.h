@@ -19,6 +19,8 @@ class TESTINGGROUNDS_API ATile : public AActor
 
 	void SpawnActor(TSubclassOf<AActor> ToSpawn, FVector Location, float YawRotation, float Scale);
 
+	void PositionNavMeshBoundsVolume();
+
 public:	
 	// Sets default values for this actor's properties
 	ATile();
@@ -36,7 +38,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		FVector PlacementMinBoundary;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		FVector PlacementMaxBoundary;
+
 private:
 
-	class UActorPool* NavMeshVolumePool;
+	UPROPERTY()
+		class UActorPool* NavMeshVolumePool;
+
+	UPROPERTY()
+		AActor* NavMeshBoundsVolume = nullptr;
 };
