@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Tile.generated.h"
 
+
+
 UCLASS()
 class TESTINGGROUNDS_API ATile : public AActor
 {
@@ -45,6 +47,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		FVector PlacementMaxBoundary;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		FVector NavMeshBoundryVolumeDisplacement;
 
 private:
 

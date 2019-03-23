@@ -2,9 +2,11 @@
 
 #include "Tile.h"
 #include "ActorPool.h"
-#include "Math/UnrealMathUtility.h"
 #include "Engine/World.h"
 #include "InfiniteTerrainGameMode.h"
+#include "Math/UnrealMathUtility.h"
+#include "NavMesh/NavMeshBoundsVolume.h"
+#include "NavigationSystem.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -67,6 +69,7 @@ ATile::ATile()
 
 	PlacementMinBoundary = FVector(0.f, -1950.f, 0.f);
 	PlacementMaxBoundary = FVector(4000.f, 1950.f, 0.f);
+	NavMeshBoundryVolumeDisplacement = FVector(2000.f, 0.f, 0.f);
 }
 
 // Called when the game starts or when spawned
@@ -121,7 +124,8 @@ void ATile::PositionNavMeshBoundsVolume()
 		NavMeshBoundsVolume = NavMeshVolumePool->Checkout();
 		if (NavMeshBoundsVolume)
 		{
-			NavMeshBoundsVolume->SetActorLocation(GetActorLocation());
+			NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavMeshBoundryVolumeDisplacement);
+			FNavigationSystem::Build(*GetWorld());
 		}
 		else
 			UE_LOG(LogTemp, Error, TEXT("Not enough Nav Mesh Bounds Volumes in the Pool."));
