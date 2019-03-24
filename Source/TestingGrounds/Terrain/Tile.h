@@ -46,9 +46,12 @@ class TESTINGGROUNDS_API ATile : public AActor
 
 	void SpawnActor(TSubclassOf<AActor> ToSpawn, const FSpawnPosition& SpawnPosition);
 
-	void SpawnAIPawn(TSubclassOf<APawn> ToSpawn, const FSpawnPosition& SpawnPosition);
+	void SpawnActor(TSubclassOf<APawn> ToSpawn, const FSpawnPosition& SpawnPosition);
 
 	void PositionNavMeshBoundsVolume();
+
+	template<class T>
+	void RandomlyPlaceActors(TSubclassOf<T> ToSpawn, int32 MinToSpawn = 1, int32 MaxToSpawn = 1, float MinScale = 1.f, float MaxScale = 1.f, float SafeRadius = 300.f);
 
 public:	
 	// Sets default values for this actor's properties
@@ -63,7 +66,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 		void PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int32 MinToSpawn = 1, int32 MaxToSpawn = 1, float SafeRadius = 100.f);
 
-	TArray<FSpawnPosition> GenerateSpawnPositions(int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius);
+	//TArray<FSpawnPosition> GenerateSpawnPositions(int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius);
 
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 		void SetNavMeshVolumePool(class UActorPool* PoolToSet);

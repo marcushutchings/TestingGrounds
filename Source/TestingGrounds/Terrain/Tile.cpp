@@ -12,6 +12,24 @@
 
 #define MAX_ATTEMPTS 20
 
+template<class T>
+void ATile::RandomlyPlaceActors(TSubclassOf<T> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
+{
+	TArray<FSpawnPosition> SpawnPositions;
+	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
+	for (size_t i = 0; i < NumberToSpawn; i++)
+	{
+		FSpawnPosition SpawnPosition;
+		SpawnPosition.Scale = FMath::RandRange(MinScale, MaxScale);
+
+		if (TryFindSafeSpawnLocation(SpawnPosition.Location, SafeRadius*SpawnPosition.Scale))
+		{
+			SpawnPosition.YawRotation = FMath::RandRange(-180.f, 180.f);
+			SpawnActor(ToSpawn, SpawnPosition);
+		}
+	}
+}
+
 bool ATile::CanSpawnAtLocation(FVector Location, float Radius)
 {
 	FHitResult HitResult;
@@ -55,20 +73,26 @@ bool ATile::TryFindSafeSpawnLocation(FVector& OutLocation, float SafeRadius)
 void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, const FSpawnPosition& SpawnPosition)
 {
 	AActor* Spawned = GetWorld()->SpawnActor<AActor>(ToSpawn);
-	Spawned->SetActorRelativeLocation(SpawnPosition.Location);
-	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-	Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
-	Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
+	if (Spawned)
+	{
+		Spawned->SetActorRelativeLocation(SpawnPosition.Location);
+		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
+		Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
+	}
 }
 
-void ATile::SpawnAIPawn(TSubclassOf<APawn> ToSpawn, const FSpawnPosition & SpawnPosition)
+void ATile::SpawnActor(TSubclassOf<APawn> ToSpawn, const FSpawnPosition & SpawnPosition)
 {
 	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn);
-	Spawned->SetActorRelativeLocation(SpawnPosition.Location);
-	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-	Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
-	Spawned->SpawnDefaultController();
-	Spawned->Tags.Add(FName("GuardBots"));
+	if (Spawned)
+	{
+		Spawned->SetActorRelativeLocation(SpawnPosition.Location);
+		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+		Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
+		Spawned->SpawnDefaultController();
+		Spawned->Tags.Add(FName("GuardBots"));
+	}
 }
 
 // Sets default values
@@ -104,40 +128,12 @@ void ATile::Tick(float DeltaTime)
 
 void ATile::PlaceTerrain(TSubclassOf<AActor> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
 {
-	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(MinToSpawn, MaxToSpawn, MinScale, MaxScale, SafeRadius);
-
-	for (auto SpawnPosition : SpawnPositions)
-	{
-		SpawnActor(ToSpawn, SpawnPosition);
-	}
+	RandomlyPlaceActors(ToSpawn, MinToSpawn, MaxToSpawn, MinScale, MaxScale, SafeRadius);
 }
 
 void ATile::PlaceAIPawns(TSubclassOf<APawn> ToSpawn, int32 MinToSpawn, int32 MaxToSpawn, float SafeRadius)
 {
-	TArray<FSpawnPosition> SpawnPositions = GenerateSpawnPositions(MinToSpawn, MaxToSpawn, 1.f, 1.f, SafeRadius);
-
-	for (auto SpawnPosition : SpawnPositions)
-	{
-		SpawnAIPawn(ToSpawn, SpawnPosition);
-	}
-}
-
-TArray<FSpawnPosition> ATile::GenerateSpawnPositions(int32 MinToSpawn, int32 MaxToSpawn, float MinScale, float MaxScale, float SafeRadius)
-{
-	TArray<FSpawnPosition> SpawnPositions;
-	size_t NumberToSpawn = FMath::RandRange(MinToSpawn, MaxToSpawn);
-	for (size_t i = 0; i < NumberToSpawn; i++)
-	{
-		FSpawnPosition SpawnPosition;
-		SpawnPosition.Scale = FMath::RandRange(MinScale, MaxScale);
-
-		if (TryFindSafeSpawnLocation(SpawnPosition.Location, SafeRadius*SpawnPosition.Scale))
-		{
-			SpawnPosition.YawRotation = FMath::RandRange(-180.f, 180.f);
-			SpawnPositions.Add(SpawnPosition);
-		}
-	}
-	return SpawnPositions;
+	RandomlyPlaceActors(ToSpawn, MinToSpawn, MaxToSpawn, 1.f, 1.f, SafeRadius);
 }
 
 void ATile::SetNavMeshVolumePool(UActorPool * PoolToSet)
