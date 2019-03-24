@@ -117,7 +117,7 @@ void ATile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	if (NavMeshVolumePool)
 		NavMeshVolumePool->Return(NavMeshBoundsVolume);
-	UE_LOG(LogTemp, Error, TEXT("End Play Called on me %s."), *GetName());
+	//UE_LOG(LogTemp, Error, TEXT("End Play Called on me %s."), *GetName());
 }
 
 // Called every frame
