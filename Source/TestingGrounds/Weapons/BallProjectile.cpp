@@ -37,7 +37,6 @@ void ABallProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
 	{
 		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
 		Destroy();
 	}
 }
