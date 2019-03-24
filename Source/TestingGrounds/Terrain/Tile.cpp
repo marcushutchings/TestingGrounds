@@ -84,12 +84,11 @@ void ATile::SpawnActor(TSubclassOf<AActor> ToSpawn, const FSpawnPosition& SpawnP
 
 void ATile::SpawnActor(TSubclassOf<APawn> ToSpawn, const FSpawnPosition & SpawnPosition)
 {
-	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn);
+	FRotator SpawnedRotation(0.f, SpawnPosition.YawRotation, 0.f);
+	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn, SpawnPosition.Location, SpawnedRotation);
 	if (Spawned)
 	{
-		Spawned->SetActorRelativeLocation(SpawnPosition.Location);
 		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-		Spawned->SetActorRotation(FRotator(0.f, SpawnPosition.YawRotation, 0.f));
 		Spawned->SpawnDefaultController();
 		Spawned->Tags.Add(FName("GuardBots"));
 	}
