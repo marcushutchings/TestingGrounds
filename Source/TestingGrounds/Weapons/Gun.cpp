@@ -26,14 +26,12 @@ AGun::AGun()
 void AGun::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void AGun::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGun::Fire()
@@ -54,6 +52,21 @@ void AGun::Fire()
 
 			// spawn the projectile at the muzzle
 			World->SpawnActor<ABallProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+
+			auto OwningActor = GetAttachParentActor();
+			if (OwningActor)
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Gun has owner %s"), *OwningActor->GetName());
+				auto OwningPawn = Cast<APawn>(OwningActor);
+				if (OwningPawn)
+				{
+					MakeNoise(1.f, OwningPawn, SpawnLocation);
+				}
+				//else
+				//	UE_LOG(LogTemp, Warning, TEXT("Gun has NO PAWN owner"));
+			}
+			//else
+			//	UE_LOG(LogTemp, Warning, TEXT("Gun has NO owner"));
 		}
 	}
 
